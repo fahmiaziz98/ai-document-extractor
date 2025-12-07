@@ -80,7 +80,7 @@ yarn dev
 pnpm dev
 ```
 
-Development server will start at: `http://localhost:5173`
+Development server will start at: `http://localhost:3000`
 
 ### 5. Build for Production
 
@@ -199,33 +199,6 @@ docker run -p 3000:3000 \
 
 4. **Deploy**
    - Click "Deploy site"
-
-### Deploy to GitHub Pages
-
-```bash
-# Update vite.config.ts
-export default {
-  base: '/ai-document-extractor/',
-  // ... other config
-}
-
-# Build and deploy
-npm run build
-npm run deploy
-```
-
-### Deploy to AWS S3 + CloudFront
-
-```bash
-# Build
-npm run build
-
-# Deploy to S3
-aws s3 sync dist/ s3://your-bucket-name/
-
-# Invalidate CloudFront
-aws cloudfront create-invalidation --distribution-id YOUR_DIST_ID --paths "/*"
-```
 
 ---
 

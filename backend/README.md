@@ -225,14 +225,6 @@ backend/
 | `python-dotenv` | 1.2.1 | Environment config |
 | `python-multipart` | 0.0.20 | Form data parsing |
 
-### Dev Dependencies
-
-Dev dependencies are automatically included when running:
-```bash
-uv sync
-```
-
-This installs: ruff, pytest, pytest-asyncio, and httpx
 ---
 
 ## 🐳 Docker Setup
@@ -307,78 +299,15 @@ app.add_middleware(
 3. Add `GROQ_API_KEY` environment variable
 4. Deploy!
 
-### Deploy to AWS Lambda
+### Deploy on HuggingFace Docker Space
 
-```bash
-# Package for Lambda
-pip install -r requirements.txt -t ./package
-
-# Use serverless framework or AWS SAM
-serverless deploy
-```
-
----
-
-### Make Commands
-
-```bash
-# Install dependencies (all including dev)
-make dev
-
-# Install only production dependencies
-make install
-
-# Run development server
-make run
-
-# Run production server
-make run-prod
-
-# Format code
-make format
-
-# Lint and fix code
-make lint
-make fix
-### Code Style
-
-Using `ruff` for linting and formatting via uv:
-
-```bash
-# Format code
-uv run ruff format app/
-
-# Check linting
-uv run ruff check app/
-
-# Or use make
-make format
-make lint
-``` Code Style
-
-### Import Errors
-
-```bash
-# Reinstall dependencies
-uv sync --force-reinstall
-
-# Clear Python cache
-make clean
-```
+See tutorial here:
+- [Your first docker space](https://huggingface.co/docs/hub/spaces-sdks-docker-first-demo)
+- [Sync Github repo to HF Space](https://github.com/ruslanmv/How-to-Sync-Hugging-Face-Spaces-with-a-GitHub-Repository)
 ---
 
 ## 🐛 Troubleshooting
 
-### OCR Not Working
-
-```bash
-# Reinstall dependencies
-uv sync --force-reinstall
-
-# Check if ONNX runtime is available
-uv run python -c "import onnxruntime; print(onnxruntime.__version__)"
-```-rf .pytest_cache
-```
 ### Port Already in Use
 
 ```bash
