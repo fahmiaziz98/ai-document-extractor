@@ -87,9 +87,9 @@ GROQ_API_KEY=gsk_your_groq_api_key_here
 make run
 ```
 
-Access API at: http://localhost:8000
+Access API at: http://localhost:7860
 
-API Docs: http://localhost:8000/docs
+API Docs: http://localhost:7860/docs
 
 ### Production Mode
 ```bash
@@ -128,30 +128,30 @@ make docker-run    # Run Docker container
 make all           # Run complete CI pipeline
 ```
 
-Server will start at: `http://localhost:8000`
+Server will start at: `http://localhost:7860`
 ## 📚 API Documentation
 
 ### Automatic Documentation
 
 Once running, access interactive API docs:
 
-- **Swagger UI**: `http://localhost:8000/docs`
-- **ReDoc**: `http://localhost:8000/redoc`
+- **Swagger UI**: `http://localhost:7860/docs`
+- **ReDoc**: `http://localhost:7860/redoc`
 
 ### Health Check
 ```bash
-curl http://localhost:8000/api/v1/health
+curl http://localhost:7860/api/v1/health
 ```
 
 ### Extract Document (Default Schema)
 ```bash
-curl -X POST http://localhost:8000/api/v1/extract \
+curl -X POST http://localhost:7860/api/v1/extract \
   -F "file=@invoice.pdf"
 ```
 
 ### Extract with Custom Schema
 ```bash
-curl -X POST http://localhost:8000/api/v1/extract \
+curl -X POST http://localhost:7860/api/v1/extract \
   -F "file=@invoice.pdf" \
   -F 'schema_config={
     "company_name": {
@@ -239,12 +239,12 @@ docker build -t idp-backend:latest .
 
 ```bash
 # With environment file
-docker run -p 8000:8000 \
+docker run -p 7860:7860 \
   --env-file .env \
   idp-backend:latest
 
 # Or with direct env var
-docker run -p 8000:8000 \
+docker run -p 7860:7860 \
   -e GROQ_API_KEY=your_key \
   idp-backend:latest
 ```
