@@ -1,0 +1,85 @@
+[project]
+name = "idp-service"
+version = "1.0.0"
+description = "Intelligent Document Processor API"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "pillow==11.3.0",
+    "pdf2image==1.17.0",
+    "numpy==2.0.2",
+    "opencv-python==4.12.0.88",
+    "groq==0.37.1",
+    "huggingface-hub==0.36.0",
+    "rapidocr-onnxruntime==1.4.4",
+    "slowapi==0.1.9",
+    "uvicorn==0.38.0",
+    "fastapi[standard]==0.118.3",
+    "loguru==0.7.3",
+    "python-dotenv==1.2.1",
+    "python-multipart==0.0.20",
+]
+
+[project.optional-dependencies]
+dev = [
+    "ruff",
+    "pytest",
+    "pytest-asyncio",
+]
+
+[tool.uv]
+dev-dependencies = [
+    "ruff>=0.1.15",
+    "pytest>=7.4.3",
+    "httpx>=0.26.0",
+    "pytest-asyncio>=0.23.3",
+]
+
+[tool.ruff]
+# Exclude common directories
+exclude = [
+    ".git",
+    ".venv",
+    "__pycache__",
+    "build",
+    "dist",
+]
+
+# Line length
+line-length = 100
+
+# Target Python 3.11
+target-version = "py311"
+
+[tool.ruff.lint]
+# Enable specific rule sets
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort
+    "N",   # pep8-naming
+    "UP",  # pyupgrade
+    "B",   # flake8-bugbear
+    "C4",  # flake8-comprehensions
+    "SIM", # flake8-simplify
+]
+
+# Ignore specific rules
+ignore = [
+    "E501",  # line too long (handled by formatter)
+    "B008",  # do not perform function calls in argument defaults
+]
+
+[tool.ruff.format]
+# Use double quotes
+quote-style = "double"
+
+# Indent with spaces
+indent-style = "space"
+
+# Format docstrings
+docstring-code-format = true
+
+[tool.ruff.lint.isort]
+known-first-party = ["app"]

@@ -1,0 +1,5 @@
+{
+  "name": "AI Document Extractor",
+  "description": "A powerful Intelligent Document Processing (IDP) tool that uses the Gemini API to extract structured data from PDFs and images based on user-defined schemas.",
+  "requestFramePermissions": []
+}
