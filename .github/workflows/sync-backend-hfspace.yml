@@ -3,26 +3,21 @@ name: Sync Backend to Hugging Face Space
 on:
   push:
     branches: ["main"]
-    # Workflow hanya jalan jika ada perubahan di folder backend
-    # Ini menghemat kuota GitHub Actions Anda
     paths:
       - "backend/**" 
   
-  # Tombol manual untuk memaksa sync jika perlu
   workflow_dispatch: {}
 
 jobs:
   sync-to-hub:
     runs-on: ubuntu-latest
     steps:
-      # 1. Download kode dari GitHub
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # Wajib 0 agar history git terbawa lengkap
-          lfs: true      # Aktifkan jika ada file model besar
+          fetch-depth: 0 
+          lfs: true      
 
-      # 2. Eksekusi Pengiriman ke HF Space
       - name: Push Backend Folder to HF Space
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
@@ -33,15 +28,10 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           
-          # Bentuk URL Remote Tujuan
           REMOTE_URL="https://$HF_USERNAME:$HF_TOKEN@huggingface.co/spaces/$HF_USERNAME/$SPACE_NAME"
           
           echo "🚀 Preparing synchronization..."
           echo "Target Space: $SPACE_NAME"
-          
-          # --- LOGIKA INTI (Subtree Split) ---
-          # Perintah ini mengambil folder 'backend', menjadikannya root, 
-          # lalu memaksa push ke branch 'main' di Hugging Face.
           
           git push --force $REMOTE_URL `git subtree split --prefix backend main`:main
           
