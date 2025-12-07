@@ -21,8 +21,8 @@ jobs:
       - name: Push Backend Folder to HF Space
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
-          HF_USERNAME: ${{ vars.HF_USERNAME }}
-          SPACE_NAME: ${{ vars.SPACE_NAME }}
+          HF_USERNAME: ${{ secrets.HF_USERNAME }}
+          SPACE_NAME: ${{ secrets.SPACE_NAME }}
         run: |
           # Setup Git User (Bot)
           git config user.name "github-actions[bot]"
