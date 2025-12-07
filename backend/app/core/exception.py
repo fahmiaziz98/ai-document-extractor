@@ -1,10 +1,10 @@
 class BaseException(Exception):
     """Base exception class for the application."""
 
-    def __init__(self, messages: str, details: dict = None):
-        self.messages = messages
+    def __init__(self, message: str, details: dict = None):
+        self.message = message
         self.details = details or {}
-        super().__init__(self.messages)
+        super().__init__(self.message)
 
 
 class OCRProcessingError(BaseException):
