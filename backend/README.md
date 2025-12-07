@@ -6,9 +6,6 @@ colorTo: purple
 sdk: docker
 pinned: false
 ---
-
-Check out the configuration reference at https://huggingface.co/docs/hub/spaces-config-reference
-
 # Backend - AI Document Extractor API 🚀
 
 A high-performance FastAPI backend for intelligent document processing. Handles OCR extraction and LLM-powered data structuring with rate limiting and error handling.
