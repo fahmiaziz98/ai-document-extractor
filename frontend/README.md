@@ -58,13 +58,13 @@ pnpm install
 touch .env
 
 # Add configuration
-echo "VITE_API_URL=http://localhost:7860" >> .env
+echo "VITE_API_URL=http://localhost:7860/api/v1/extract" >> .env
 ```
 
 Or manually create `.env`:
 ```env
 # API Configuration
-VITE_API_URL=http://localhost:7860
+VITE_API_URL=http://localhost:7860/api/v1/extract
 ```
 
 ### 4. Run Development Server
