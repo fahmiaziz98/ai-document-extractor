@@ -24,6 +24,8 @@ jobs:
         run: uv python install 3.11
 
       - name: Install Dependencies & Run Tests
+        env:
+          GROQ_API_KEY: "gsk_dummy_api_key"
         run: |
           cd backend
           
