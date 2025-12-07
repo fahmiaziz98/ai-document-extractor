@@ -58,13 +58,13 @@ pnpm install
 touch .env
 
 # Add configuration
-echo "VITE_API_URL=http://localhost:7860/api/v1/extract" >> .env
+echo "VITE_API_URL=http://localhost:7860" >> .env
 ```
 
 Or manually create `.env`:
 ```env
 # API Configuration
-VITE_API_URL=http://localhost:7860/api/v1/extract
+VITE_API_URL=http://localhost:7860
 ```
 
 ### 4. Run Development Server
@@ -156,7 +156,7 @@ docker build -t idp-frontend:latest .
 
 ```bash
 docker run -p 3000:3000 \
-  -e VITE_API_URL=http://backend:7860 \
+  -e VITE_API_URL=http://localhost:7860 \
   idp-frontend:latest
 ```
 ---

@@ -25,7 +25,7 @@ const App: React.FC = () => {
       formData.append('schema_config', JSON.stringify(fields)); 
 
       const apiUrl = process.env.VITE_API_URL;
-      const response = await fetch(apiUrl, {
+      const response = await fetch(`${apiUrl}/api/v1/extract`, {
         method: 'POST',
         body: formData,
       });
