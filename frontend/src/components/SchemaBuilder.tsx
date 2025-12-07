@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { SchemaField, FieldType, ArrayItemStructure } from '../types';
-import { Trash2, Plus, GripVertical, Info, ChevronDown, ChevronRight } from 'lucide-react';
+import { Trash2, Plus, GripVertical, ChevronDown, ChevronRight } from 'lucide-react';
 
 interface SchemaBuilderProps {
   fields: SchemaField[];
@@ -29,11 +29,9 @@ const SchemaBuilder: React.FC<SchemaBuilderProps> = ({ fields, setFields }) => {
     setFields(fields.map(f => {
       if (f.id === id) {
         const updated = { ...f, ...updates };
-        // If changing to ARRAY type, initialize items_structure
         if (updates.type === FieldType.ARRAY && !updated.items_structure) {
           updated.items_structure = {};
         }
-        // If changing from ARRAY type, remove items_structure
         if (updates.type && updates.type !== FieldType.ARRAY) {
           delete updated.items_structure;
         }
@@ -47,7 +45,12 @@ const SchemaBuilder: React.FC<SchemaBuilderProps> = ({ fields, setFields }) => {
     setFields(fields.map(f => {
       if (f.id === fieldId && f.type === FieldType.ARRAY) {
         const newStructure = { ...f.items_structure };
-        const newKey = `field_${Object.keys(newStructure).length + 1}`;
+        // Generate unique default name to avoid collision
+        const count = Object.keys(newStructure).length + 1;
+        let newKey = `field_${count}`;
+        while (newStructure[newKey]) {
+            newKey = `field_${Math.floor(Math.random() * 1000)}`;
+        }
         newStructure[newKey] = 'Description';
         return { ...f, items_structure: newStructure };
       }
@@ -70,9 +73,10 @@ const SchemaBuilder: React.FC<SchemaBuilderProps> = ({ fields, setFields }) => {
     setFields(fields.map(f => {
       if (f.id === fieldId && f.items_structure) {
         const newStructure: ArrayItemStructure = {};
+        // Kita loop untuk mempertahankan urutan, tapi mengganti key yang sedang diedit
         Object.entries(f.items_structure).forEach(([k, v]) => {
           if (k === oldKey) {
-            newStructure[newKey] = description;
+            newStructure[newKey] = description; // Key berubah disini
           } else {
             newStructure[k] = v as string;
           }
@@ -86,11 +90,8 @@ const SchemaBuilder: React.FC<SchemaBuilderProps> = ({ fields, setFields }) => {
   const toggleArrayExpanded = (fieldId: string) => {
     setExpandedArrays(prev => {
       const newSet = new Set(prev);
-      if (newSet.has(fieldId)) {
-        newSet.delete(fieldId);
-      } else {
-        newSet.add(fieldId);
-      }
+      if (newSet.has(fieldId)) newSet.delete(fieldId);
+      else newSet.add(fieldId);
       return newSet;
     });
   };
@@ -131,7 +132,6 @@ const SchemaBuilder: React.FC<SchemaBuilderProps> = ({ fields, setFields }) => {
                 </div>
                 
                 <div className="flex-1 space-y-3">
-                  {/* Basic Fields */}
                   <div className="flex gap-3">
                     <div className="flex-1">
                       <label className="block text-xs font-medium text-slate-500 mb-1">Key Name</label>
@@ -168,7 +168,7 @@ const SchemaBuilder: React.FC<SchemaBuilderProps> = ({ fields, setFields }) => {
                     />
                   </div>
 
-                  {/* Array Structure Configuration */}
+                  {/* Array Structure Configuration - PERBAIKAN DI SINI */}
                   {field.type === FieldType.ARRAY && (
                     <div className="mt-3 border border-blue-100 bg-blue-50/30 rounded-lg p-3">
                       <button
@@ -197,11 +197,14 @@ const SchemaBuilder: React.FC<SchemaBuilderProps> = ({ fields, setFields }) => {
 
                       {expandedArrays.has(field.id) && (
                         <div className="space-y-2 mt-2">
-                          {field.items_structure && Object.entries(field.items_structure).map(([arrayKey, arrayDesc]) => (
-                            <div key={arrayKey} className="flex gap-2 items-center bg-white p-2 rounded border border-blue-100">
+                          {field.items_structure && Object.entries(field.items_structure).map(([arrayKey, arrayDesc], index) => (
+                            // PERUBAHAN PENTING: key={index} 
+                            // Menggunakan index menjaga elemen tetap hidup saat namanya (arrayKey) berubah
+                            <div key={index} className="flex gap-2 items-center bg-white p-2 rounded border border-blue-100">
                               <input
                                 type="text"
                                 value={arrayKey}
+                                // Pass 'arrayKey' as 'oldKey'
                                 onChange={(e) => handleUpdateArrayField(field.id, arrayKey, e.target.value, arrayDesc as string)}
                                 placeholder="Field name"
                                 className="flex-1 text-xs px-2 py-1.5 border border-slate-200 rounded focus:outline-none focus:ring-1 focus:ring-blue-500/30"
@@ -209,6 +212,7 @@ const SchemaBuilder: React.FC<SchemaBuilderProps> = ({ fields, setFields }) => {
                               <input
                                 type="text"
                                 value={String(arrayDesc)}
+                                // Pass 'arrayKey' as both 'oldKey' and 'newKey' (because only desc changed)
                                 onChange={(e) => handleUpdateArrayField(field.id, arrayKey, arrayKey, e.target.value)}
                                 placeholder="Description"
                                 className="flex-1 text-xs px-2 py-1.5 border border-slate-200 rounded focus:outline-none focus:ring-1 focus:ring-blue-500/30"
@@ -227,7 +231,6 @@ const SchemaBuilder: React.FC<SchemaBuilderProps> = ({ fields, setFields }) => {
                     </div>
                   )}
 
-                  {/* Required Toggle & Delete */}
                   <div className="flex items-center justify-between pt-1">
                     <label className="flex items-center gap-2 cursor-pointer select-none">
                       <div className="relative inline-flex items-center">
