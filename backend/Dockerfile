@@ -10,8 +10,11 @@ WORKDIR /app
 # Copy dependency files
 COPY pyproject.toml README.md ./
 
+# Copy lockfile if it exists, otherwise create it
+COPY uv.lock* ./
+
 # Install dependencies
-RUN uv sync --frozen --no-cache --no-dev
+RUN uv sync --frozen --no-cache --no-dev 2>/dev/null || (uv lock && uv sync --frozen --no-cache --no-dev)
 
 # Stage 2: Runtime
 FROM python:3.11-slim AS runtime
