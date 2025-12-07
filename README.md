@@ -77,6 +77,9 @@ ai-document-extractor/
 └── README.md        # This file
 ```
 
+### Demo UI
+<img src="assets/demo.png">
+
 ---
 
 ## 🐳 Docker Setup
