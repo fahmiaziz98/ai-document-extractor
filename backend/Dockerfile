@@ -1,5 +1,7 @@
 FROM python:3.11-slim
 
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
+
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libgl1 \
     libglib2.0-0 \
@@ -7,17 +9,19 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 RUN useradd -m -u 1000 user
-USER user
-ENV PATH="/home/user/.local/bin:$PATH"
 
 WORKDIR /app
+RUN chown user:user /app
 
-COPY --chown=user ./requirements.txt requirements.txt
+USER user
 
-RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir --upgrade -r requirements.txt
+COPY --chown=user pyproject.toml uv.lock ./
 
-COPY --chown=user . /app
+RUN uv sync --frozen --no-cache --no-dev
+
+COPY --chown=user app ./app
+
+ENV PATH="/app/.venv/bin:$PATH"
 
 EXPOSE 7860
 
