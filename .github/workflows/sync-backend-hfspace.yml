@@ -1,4 +1,4 @@
-name: Sync Backend to Hugging Face Space
+name: CI/CD Pipeline (Test & Deploy to HF)
 
 on:
   push:
@@ -9,8 +9,34 @@ on:
   workflow_dispatch: {}
 
 jobs:
-  sync-to-hub:
+  test-backend:
+    name: Run test & validation
     runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v1
+
+      - name: Set up Python 3.11
+        run: uv python install 3.11
+
+      - name: Install Dependencies & Run Tests
+        run: |
+          cd backend
+          
+          uv sync --dev
+          
+          # PYTHONPATH=. diperlukan agar folder 'app' terbaca
+          PYTHONPATH=. uv run pytest tests/ -v
+
+  deploy-to-hf:
+    name: Deploy to huggingface spaces
+    needs: test-backend
+    runs-on: ubuntu-latest
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
