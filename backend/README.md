@@ -343,8 +343,6 @@ echo $GROQ_API_KEY  # Should start with 'gsk_'
 
 # Get new key at https://console.groq.com/
 ```
-
-### Memory Issues
 ### Memory Issues
 
 ```bash
@@ -368,8 +366,6 @@ async def extract_document(file: UploadFile):
     # Non-blocking file reading
     content = await file.read()
 ```
-
-### Workers
 ### Workers
 
 Increase workers for production:
