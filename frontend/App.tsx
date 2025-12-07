@@ -25,8 +25,12 @@ const App: React.FC = () => {
       formData.append('schema_config', JSON.stringify(fields)); 
 
       const apiUrl = process.env.VITE_API_URL;
+      const hfToken = process.env.HF_TOKEN;
       const response = await fetch(`${apiUrl}/api/v1/extract`, {
         method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${hfToken}`
+        },
         body: formData,
       });
 
