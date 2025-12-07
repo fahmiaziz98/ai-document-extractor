@@ -174,37 +174,6 @@ cd frontend
 docker build -t idp-frontend .
 docker run -p 3000:3000 idp-frontend
 ```
-
----
-
-## 📚 API Documentation
-
-### Endpoints
-
-**Health Check:**
-```bash
-GET /health
-```
-
-**Extract Data from Document:**
-```bash
-POST /api/v1/extract
-Content-Type: multipart/form-data
-
-Parameters:
-- file: Binary file (PDF/Image)
-- schema_config: JSON string with field definitions
-```
-
-**Example Request:**
-```bash
-curl -X POST "http://localhost:8000/api/v1/extract" \
-  -F "file=@document.pdf" \
-  -F "schema_config={\"fields\":[{\"name\":\"name\",\"type\":\"string\"}]}"
-```
-
-Full API documentation available at: `http://localhost:8000/docs`
-
 ---
 
 ## 📝 Project Structure
@@ -255,7 +224,7 @@ ai-document-extractor/
 1. Connect GitHub repository
 2. Set `VITE_API_URL` to your deployed backend URL
 3. Deploy!
-
+ 
 ---
 
 ## 🛠️ Troubleshooting
