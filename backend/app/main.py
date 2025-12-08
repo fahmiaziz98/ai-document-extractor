@@ -5,15 +5,15 @@ from dotenv import find_dotenv, load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from huggingface_hub import hf_hub_download
+from loguru import logger
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
-from loguru import logger
 
 from app.api import dependencies
 from app.api.v1 import endpoints
+from app.core.limiter import limiter
 from app.services.llm_service import LLMService
 from app.services.ocr_service import OCRService
-from app.core.limiter import limiter
 
 load_dotenv(find_dotenv())
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")

@@ -1,4 +1,4 @@
-class BaseException(Exception):
+class BaseAppError(Exception):
     """Base exception class for the application."""
 
     def __init__(self, message: str, details: dict = None):
@@ -7,25 +7,25 @@ class BaseException(Exception):
         super().__init__(self.message)
 
 
-class OCRProcessingError(BaseException):
+class OCRProcessingError(BaseAppError):
     """Exception raised for errors during OCR processing."""
 
     pass
 
 
-class LLMProcessingError(BaseException):
+class LLMProcessingError(BaseAppError):
     """Exception raised for errors during LLM processing."""
 
     pass
 
 
-class InvalidFileError(BaseException):
+class InvalidFileError(BaseAppError):
     """Exception raised for invalid file inputs."""
 
     pass
 
 
-class SchemaValidationError(BaseException):
+class SchemaValidationError(BaseAppError):
     """Exception raised for schema validation errors."""
 
     pass

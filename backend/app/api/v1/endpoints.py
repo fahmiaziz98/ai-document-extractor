@@ -1,14 +1,14 @@
 import json
 
 from fastapi import (
-    APIRouter, 
-    Depends, 
-    File, 
-    Form, 
-    HTTPException, 
+    APIRouter,
+    Depends,
+    File,
+    Form,
+    HTTPException,
+    Request,
+    Response,
     UploadFile,
-    Request, 
-    Response
 )
 from loguru import logger
 
@@ -97,8 +97,8 @@ async def extract_document(
         try:
             custom_schema = json.loads(schema_config)
             target_schema = custom_schema
-        except json.JSONDecodeError:
-            raise HTTPException(status_code=400, detail="Invalid JSON in schema_config")
+        except json.JSONDecodeError as e:
+            raise HTTPException(status_code=400, detail="Invalid JSON in schema_config") from e
 
     try:
         # OCR Extraction
@@ -110,7 +110,7 @@ async def extract_document(
                 "filename": file.filename,
                 "message": "No text detected in document",
                 "data": None,
-                "raw_text": None
+                "raw_text": None,
             }
 
         # LLM Parsing
@@ -121,27 +121,27 @@ async def extract_document(
             "filename": file.filename,
             "extraction_schema_used": target_schema,
             "data": extracted_data,
-            "raw_text": raw_text
+            "raw_text": raw_text,
         }
 
     except InvalidFileError as e:
-        raise HTTPException(status_code=400, detail=e.message)
+        raise HTTPException(status_code=400, detail=e.messages) from e
     except OCRProcessingError as e:
-        raise HTTPException(status_code=500, detail=f"OCR failed: {e.message}")
+        raise HTTPException(status_code=500, detail=f"OCR failed: {e.messages}") from e
     except LLMProcessingError as e:
-        raise HTTPException(status_code=500, detail=f"LLM failed: {e.message}")
+        raise HTTPException(status_code=500, detail=f"LLM failed: {e.messages}") from e
     except Exception as e:
         logger.error(f"Unexpected error: {e}")
-        raise HTTPException(status_code=500, detail="Internal server error")
+        raise HTTPException(status_code=500, detail="Internal server error") from e
 
 
 @router.get("/health")
 @limiter.limit("5/minute")
 async def health_check(
-    request: Request, 
+    request: Request,
     response: Response,
-    ocr: OCRService = Depends(get_ocr_service), 
-    llm: LLMService = Depends(get_llm_service)
+    ocr: OCRService = Depends(get_ocr_service),
+    llm: LLMService = Depends(get_llm_service),
 ):
     """Health check endpoint"""
     return {

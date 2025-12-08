@@ -46,18 +46,18 @@ class LLMService:
 
         system_prompt = f"""
         You are an intelligent document extraction AI.
-        
+
         Your task is to extract information from the document text based on the USER DEFINED SCHEMA below.
-        
+
         USER SCHEMA DEFINITION:
         {schema_str}
 
         INSTRUCTIONS:
         1. **Look at the 'description'** for each field to understand what to look for.
-        2. **Check 'required'**: 
+        2. **Check 'required'**:
            - If 'required': true and data is missing, try your best to infer or return "NOT_FOUND".
            - If 'required': false and data is missing, strictly return null.
-        3. **Output Format**: Return ONLY a clean JSON object containing the extracted data (key-value). 
+        3. **Output Format**: Return ONLY a clean JSON object containing the extracted data (key-value).
            Do not include the descriptions in the output, just the values.
         4. No markdown formatting.
         """
@@ -83,7 +83,7 @@ class LLMService:
 
         except json.JSONDecodeError as e:
             logger.error(f"LLM returned invalid JSON: {e}")
-            raise LLMProcessingError("Failed to parse LLM response", {"error": str(e)})
+            raise LLMProcessingError("Failed to parse LLM response", {"error": str(e)}) from e
         except Exception as e:
             logger.error(f"LLM API error: {e}")
-            raise LLMProcessingError("LLM processing failed", {"error": str(e)})
+            raise LLMProcessingError("LLM processing failed", {"error": str(e)}) from e

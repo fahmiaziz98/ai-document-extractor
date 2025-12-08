@@ -59,7 +59,7 @@ class OCRService:
                 open_cv_image = cv2.cvtColor(np.array(pil_image), cv2.COLOR_RGB2BGR)
                 return open_cv_image
             except Exception as e:
-                raise OCRProcessingError("Failed to process PDF", {"error": str(e)})
+                raise OCRProcessingError("Failed to process PDF", {"error": str(e)}) from e
 
         nparr = np.frombuffer(file_bytes, np.uint8)
         img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
@@ -96,4 +96,4 @@ class OCRService:
             raise
         except Exception as e:
             logger.error(f"Unexpected OCR error: {e}")
-            raise OCRProcessingError("OCR extraction failed", {"error": str(e)})
+            raise OCRProcessingError("OCR extraction failed", {"error": str(e)}) from e
