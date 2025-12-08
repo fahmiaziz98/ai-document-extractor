@@ -40,6 +40,9 @@ fix: ## Auto-fix linting issues
 	$(UV) run ruff check --fix app/
 	$(UV) run ruff format app/
 
+test: ## Run unit tests
+	$(UV) run pytest tests/ -v
+
 run: ## Run development server
 	$(UV) run uvicorn app.main:app --reload --host 0.0.0.0 --port 7860
 

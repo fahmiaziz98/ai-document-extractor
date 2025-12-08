@@ -1,44 +1,5 @@
 import json
 import pytest
-from fastapi.testclient import TestClient
-from unittest.mock import MagicMock, patch
-
-from app.main import app
-from app.api.dependencies import get_ocr_service, get_llm_service
-
-
-@pytest.fixture(scope="function")
-def mock_ocr_service():
-    """Create mock OCR service"""
-    mock = MagicMock()
-    mock.extract_text.return_value = "INVOICE #001\nTotal: 100000"
-    return mock
-
-
-@pytest.fixture(scope="function")
-def mock_llm_service():
-    """Create mock LLM service"""
-    mock = MagicMock()
-    mock.parse_document.return_value = {
-        "invoice_number": "001",
-        "total": 100000
-    }
-    return mock
-
-
-@pytest.fixture(scope="function")
-def client(mock_ocr_service, mock_llm_service):
-    """
-    Create TestClient with overridden dependencies
-    This ensures services are available during tests
-    """
-    app.dependency_overrides[get_ocr_service] = lambda: mock_ocr_service
-    app.dependency_overrides[get_llm_service] = lambda: mock_llm_service
-    
-    with TestClient(app) as test_client:
-        yield test_client
-    
-    app.dependency_overrides.clear()
 
 
 def test_read_root(client):
@@ -240,4 +201,5 @@ def test_allowed_file_types(client):
         files = {'file': (filename, b'fake bytes', content_type)}
         response = client.post("/api/v1/extract", files=files)
         
+        # Should not fail on file type (might fail on other validation)
         assert response.status_code != 400 or "Invalid file type" not in response.json()["detail"]
