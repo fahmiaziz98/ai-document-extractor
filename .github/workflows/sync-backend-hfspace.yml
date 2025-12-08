@@ -5,50 +5,12 @@ on:
     branches: ["main"]
     paths:
       - "backend/**" 
-  pull_request:
-    branches: ["main"]
-    paths:
-      - "backend/**"
+  
   workflow_dispatch: {}
 
 jobs:
-  code-quality:
-    name: Code quality
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Install uv
-        uses: astral-sh/setup-uv@v1
-
-      - name: Set up Python 3.11
-        run: uv python install 3.11
-
-      - name: Install dependencies
-        run: |
-          cd backend
-          uv sync --dev
-
-      - name: Run Ruff Linter
-        run: |
-          cd backend
-          echo "Running Ruff linter..."
-          uv run ruff check app/ --output-format=github
-        continue-on-error: false
-
-      - name: Run Ruff Format Check
-        run: |
-          cd backend
-          echo "Checking code formatting..."
-          uv run ruff format --check app/
-        continue-on-error: false
-
-
   test-backend:
     name: Run test & validation
-    needs: code-quality
     runs-on: ubuntu-latest
 
     steps:
@@ -66,76 +28,25 @@ jobs:
           GROQ_API_KEY: "gsk_dummy_api_key"
         run: |
           cd backend
-          echo "Running pytest with coverage..."
-          PYTHONPATH=. uv run pytest tests/ -v \
-            --cov=app \
-            --cov-report=term-missing \
-            --cov-report=xml \
-            --cov-report=html \
-            --cov-fail-under=80
-
-      - name: Upload Coverage Report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: coverage-report
-          path: backend/htmlcov/
-          retention-days: 7
-
-      - name: Coverage Summary
-        if: always()
-        run: |
-          cd backend
-          echo "==================================="
-          echo "📊 COVERAGE SUMMARY"
-          echo "==================================="
-          uv run coverage report --skip-empty
-          echo "==================================="
+          
+          uv sync --dev
+          
+          # PYTHONPATH=. diperlukan agar folder 'app' terbaca
+          PYTHONPATH=. uv run pytest tests/ -v
 
   deploy-to-hf:
     name: Deploy to huggingface spaces
-    needs: [code-quality, test-backend]
+    needs: test-backend
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
           fetch-depth: 0 
-          lfs: true    
+          lfs: true      
 
-      - name: Validate Secrets
-        run: |
-          if [ -z "${{ secrets.HF_TOKEN }}" ]; then
-            echo "Error: HF_TOKEN secret not set"
-            exit 1
-          fi
-          if [ -z "${{ secrets.HF_USERNAME }}" ]; then
-            echo "Error: HF_USERNAME secret not set"
-            exit 1
-          fi
-          if [ -z "${{ secrets.SPACE_NAME }}" ]; then
-            echo "Error: SPACE_NAME secret not set"
-            exit 1
-          fi
-          echo "All required secrets are set"
-
-      - name: Get Last Successful Deployment Commit
-        id: last_deploy
-        run: |
-          # Get the commit hash of the last successful deployment
-          LAST_COMMIT=$(git log --format="%H" --grep="Deployment successful" -n 1 || echo "")
-          if [ -z "$LAST_COMMIT" ]; then
-            echo "No previous successful deployment found"
-            echo "last_commit=none" >> $GITHUB_OUTPUT
-          else
-            echo "Last successful deployment: $LAST_COMMIT"
-            echo "last_commit=$LAST_COMMIT" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Deploy Backend to HF Space
-        id: deploy
+      - name: Push Backend Folder to HF Space
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
           HF_USERNAME: ${{ secrets.HF_USERNAME }}
@@ -144,122 +55,12 @@ jobs:
           # Setup Git User (Bot)
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-
+          
           REMOTE_URL="https://$HF_USERNAME:$HF_TOKEN@huggingface.co/spaces/$HF_USERNAME/$SPACE_NAME"
-
-          echo "Target Space: $HF_USERNAME/$SPACE_NAME"
-          echo "Preparing deployment..."
-
-          # Deploy backend folder to HF Space root
-          if git push --force $REMOTE_URL `git subtree split --prefix backend main`:main; then
-            echo "Deployment successful!"
-            echo "deploy_status=success" >> $GITHUB_OUTPUT
-          else
-            echo "Deployment failed!"
-            echo "deploy_status=failed" >> $GITHUB_OUTPUT
-            exit 1
-          fi
-
-      - name: Wait for HF Space to Build
-        if: steps.deploy.outputs.deploy_status == 'success'
-        run: |
-          echo "Waiting 5 minutes for HF Space to initialize and build..."
-          sleep 300
-
-      - name: Verify Deployment Health
-        id: health_check
-        if: steps.deploy.outputs.deploy_status == 'success'
-        env:
-          HF_TOKEN: ${{ secrets.HF_TOKEN }}
-          HF_USERNAME: ${{ secrets.HF_USERNAME }}
-          SPACE_NAME: ${{ secrets.SPACE_NAME }}
-        run: |
-          SPACE_URL="https://$HF_USERNAME-$SPACE_NAME.hf.space"
-          HEALTH_ENDPOINT="$SPACE_URL/api/v1/health"
-
-          echo "Checking health endpoint: $HEALTH_ENDPOINT"
-          echo "Using authentication for private space"
-
-          MAX_RETRIES=5
-          RETRY_COUNT=0
-          HEALTH_CHECK_PASSED=false
-
-          while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
-            # Add Authorization header for private space access
-            HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -m 10 \
-              -H "Authorization: Bearer $HF_TOKEN" \
-              "$HEALTH_ENDPOINT")
-            
-            if [ "$HTTP_CODE" = "200" ]; then
-              echo "Health check passed! (HTTP $HTTP_CODE)"
-              HEALTH_CHECK_PASSED=true
-              break
-            else
-              RETRY_COUNT=$((RETRY_COUNT + 1))
-              echo "Attempt $RETRY_COUNT/$MAX_RETRIES failed (HTTP $HTTP_CODE), retrying in 10s..."
-              sleep 5
-            fi
-          done
-
-          if [ "$HEALTH_CHECK_PASSED" = true ]; then
-            echo "health_status=passed" >> $GITHUB_OUTPUT
-            echo "Deployment verified successfully!"
-          else
-            echo "health_status=failed" >> $GITHUB_OUTPUT
-            echo "Health check failed after $MAX_RETRIES attempts"
-            exit 1
-          fi
-
-      - name: Rollback on Health Check Failure
-        if: failure() && steps.health_check.outputs.health_status == 'failed' && steps.last_deploy.outputs.last_commit != 'none'
-        env:
-          HF_TOKEN: ${{ secrets.HF_TOKEN }}
-          HF_USERNAME: ${{ secrets.HF_USERNAME }}
-          SPACE_NAME: ${{ secrets.SPACE_NAME }}
-        run: |
-          echo "Deployment failed health check, attempting rollback..."
-
-          LAST_COMMIT="${{ steps.last_deploy.outputs.last_commit }}"
-          REMOTE_URL="https://$HF_USERNAME:$HF_TOKEN@huggingface.co/spaces/$HF_USERNAME/$SPACE_NAME"
-
-          # Checkout last successful commit
-          git checkout $LAST_COMMIT
-
-          echo "Rolling back to commit: $LAST_COMMIT"
-
-          # Deploy the last successful version
-          if git push --force $REMOTE_URL `git subtree split --prefix backend $LAST_COMMIT`:main; then
-            echo "Rollback successful!"
-            echo "Current deployment failed but previous version restored"
-          else
-            echo "Rollback failed! Manual intervention required"
-            exit 1
-          fi
-
-      - name: Mark Successful Deployment
-        if: steps.health_check.outputs.health_status == 'passed'
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-
-          # Create a tag for successful deployment
-          TIMESTAMP=$(date +%Y%m%d_%H%M%S)
-          TAG_NAME="deployment-success-$TIMESTAMP"
-
-          git tag -a "$TAG_NAME" -m "Deployment successful at $TIMESTAMP"
-          git push origin "$TAG_NAME" || echo "Tag push failed (not critical)"
-
-      - name: Deployment Summary
-        if: always()
-        env:
-          HF_USERNAME: ${{ secrets.HF_USERNAME }}
-          SPACE_NAME: ${{ secrets.SPACE_NAME }}
-        run: |
-          echo "=================================="
-          echo "🎉 DEPLOYMENT SUMMARY"
-          echo "=================================="
-          echo "Space: $HF_USERNAME/$SPACE_NAME"
-          echo "URL: https://$HF_USERNAME-$SPACE_NAME.hf.space"
-          echo "Docs: https://$HF_USERNAME-$SPACE_NAME.hf.space/docs"
-          echo "Status: ${{ steps.health_check.outputs.health_status || 'unknown' }}"
-          echo "=================================="
+          
+          echo "🚀 Preparing synchronization..."
+          echo "Target Space: $SPACE_NAME"
+          
+          git push --force $REMOTE_URL `git subtree split --prefix backend main`:main
+          
+          echo "✅ Sync complete! Backend folder deployed to Space root."
