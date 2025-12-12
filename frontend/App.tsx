@@ -18,11 +18,11 @@ const App: React.FC = () => {
     if (!file) return;
 
     setIsLoading(true);
-    
+
     try {
       const formData = new FormData();
       formData.append('file', file);
-      formData.append('schema_config', JSON.stringify(fields)); 
+      formData.append('schema_config', JSON.stringify(fields));
 
       const apiUrl = process.env.VITE_API_URL;
       const hfToken = process.env.HF_TOKEN;
@@ -37,7 +37,7 @@ const App: React.FC = () => {
       if (!response.ok) throw new Error('API request failed');
 
       const data: ProcessingResponse = await response.json();
-      
+
       // 3. Update State
       setResult({
         data: data.data, // Adjust based on your API response structure
@@ -57,7 +57,7 @@ const App: React.FC = () => {
       <Header />
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        
+
         {/* Error Toast / Banner */}
         {error && (
           <div className="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg flex items-center gap-3 animate-in fade-in slide-in-from-top-2">
@@ -67,8 +67,8 @@ const App: React.FC = () => {
           </div>
         )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 h-full">
-          
+        <div className="grid grid-cols-1 lg:grid-cols-11 gap-5 h-full">
+
           {/* Left Column: Configuration (5 cols) */}
           <div className="lg:col-span-5 flex flex-col gap-6">
             <div className="flex-none">
@@ -90,8 +90,8 @@ const App: React.FC = () => {
               disabled={isLoading || !file}
               className={`
                 w-full py-4 rounded-xl font-bold text-white shadow-lg shadow-blue-500/20 flex items-center justify-center gap-2 transition-all
-                ${isLoading || !file 
-                  ? 'bg-slate-300 cursor-not-allowed shadow-none' 
+                ${isLoading || !file
+                  ? 'bg-slate-300 cursor-not-allowed shadow-none'
                   : 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 hover:shadow-xl hover:scale-[1.02] active:scale-[0.98]'
                 }
               `}
@@ -102,13 +102,13 @@ const App: React.FC = () => {
           </div>
 
           {/* Right Column: Results (7 cols) */}
-          <div className="lg:col-span-7 flex flex-col h-full min-h-[500px]">
-             <h2 className="text-lg font-semibold text-slate-800 mb-3">3. Extraction Results</h2>
-             <div className="flex-1">
-               <ResultsViewer result={result} isLoading={isLoading} />
-             </div>
+          <div className="lg:col-span-6 flex flex-col h-full min-h-[500px]">
+            <h2 className="text-lg font-semibold text-slate-800 mb-3">3. Extraction Results</h2>
+            <div className="flex-1">
+              <ResultsViewer result={result} isLoading={isLoading} />
+            </div>
           </div>
-        
+
         </div>
       </main>
     </div>
