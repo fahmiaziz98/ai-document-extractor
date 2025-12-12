@@ -62,6 +62,7 @@ echo "VITE_API_URL=http://localhost:7860" >> .env
 ```
 
 Or manually create `.env`:
+
 ```env
 # API Configuration
 VITE_API_URL=http://localhost:7860
@@ -127,20 +128,20 @@ frontend/
 
 ### Production
 
-| Package | Version | Purpose |
-|---------|---------|---------|
-| `react` | ^19.2.1 | UI framework |
-| `react-dom` | ^19.2.1 | React rendering |
-| `lucide-react` | ^0.555.0 | Icon library |
+| Package        | Version  | Purpose         |
+| -------------- | -------- | --------------- |
+| `react`        | ^19.2.1  | UI framework    |
+| `react-dom`    | ^19.2.1  | React rendering |
+| `lucide-react` | ^0.555.0 | Icon library    |
 
 ### Development
 
-| Package | Version | Purpose |
-|---------|---------|---------|
-| `vite` | ^6.2.0 | Build tool |
-| `typescript` | ~5.8.2 | Type checking |
-| `@vitejs/plugin-react` | ^5.0.0 | React plugin for Vite |
-| `tailwindcss` | Latest | CSS utility framework |
+| Package                | Version | Purpose               |
+| ---------------------- | ------- | --------------------- |
+| `vite`                 | ^6.2.0  | Build tool            |
+| `typescript`           | ~5.8.2  | Type checking         |
+| `@vitejs/plugin-react` | ^5.0.0  | React plugin for Vite |
+| `tailwindcss`          | Latest  | CSS utility framework |
 
 ---
 
@@ -159,6 +160,7 @@ docker run -p 3000:3000 \
   -e VITE_API_URL=http://localhost:7860 \
   idp-frontend:latest
 ```
+
 ---
 
 ## 🚀 Deployment
@@ -232,7 +234,7 @@ const API_URL = import.meta.env.VITE_API_URL;
 const response = await fetch(`${API_URL}`, {
   method: 'POST',
   headers: {
-    'Authorization': `Bearer ${token}`, // Get from backend
+    Authorization: `Bearer ${token}`, // Get from backend
   },
   body: formData,
 });
@@ -318,7 +320,7 @@ npm run dev -- --host
 console.log('API URL:', import.meta.env.VITE_API_URL);
 
 // Add error logging
-fetch(url).catch(err => {
+fetch(url).catch((err) => {
   console.error('API Error:', err);
 });
 

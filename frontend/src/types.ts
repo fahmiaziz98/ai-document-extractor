@@ -2,7 +2,7 @@ export enum FieldType {
   STRING = 'STRING',
   NUMBER = 'NUMBER',
   BOOLEAN = 'BOOLEAN',
-  ARRAY = 'ARRAY'
+  ARRAY = 'ARRAY',
 }
 
 export interface ArrayItemStructure {
@@ -23,9 +23,9 @@ export interface ExtractionResult {
 }
 
 export interface ProcessingResponse {
-  status: string,
-  filename: string,
-  extraction_schema_used: JSON,
+  status: string;
+  filename: string;
+  extraction_schema_used: JSON;
   data: ExtractionResult | null;
-  raw_text: string
+  raw_text: string;
 }

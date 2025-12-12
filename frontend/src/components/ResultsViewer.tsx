@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
 import { ProcessingResponse } from '../types';
-import { Check, Copy, Code, List, ChevronDown, ChevronRight, Zap } from 'lucide-react';
+import { Copy, Code, List, ChevronDown, ChevronRight, Zap, Download } from 'lucide-react';
 
 interface ResultsViewerProps {
   result: ProcessingResponse | null;
   isLoading: boolean;
+  filename?: string;
 }
 
-const ResultsViewer: React.FC<ResultsViewerProps> = ({ result, isLoading }) => {
+const ResultsViewer: React.FC<ResultsViewerProps> = ({ result, isLoading, filename }) => {
   const [activeTab, setActiveTab] = useState<'formatted' | 'json'>('formatted');
   const [showRawText, setShowRawText] = useState(false);
 
@@ -15,6 +16,28 @@ const ResultsViewer: React.FC<ResultsViewerProps> = ({ result, isLoading }) => {
     if (result?.data) {
       navigator.clipboard.writeText(JSON.stringify(result.data, null, 2));
     }
+  };
+
+  const handleDownload = () => {
+    if (!result?.data) return;
+
+    // Get base filename without extension
+    const baseFilename = filename
+      ? filename.replace(/\.[^/.]+$/, '') // Remove extension
+      : 'extraction';
+
+    // Create download filename
+    const downloadFilename = `${baseFilename}_results.json`;
+
+    // Create blob and download
+    const jsonStr = JSON.stringify(result.data, null, 2);
+    const blob = new Blob([jsonStr], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = downloadFilename;
+    a.click();
+    URL.revokeObjectURL(url);
   };
 
   const renderValue = (value: any): React.ReactNode => {
@@ -74,7 +97,8 @@ const ResultsViewer: React.FC<ResultsViewerProps> = ({ result, isLoading }) => {
         </div>
         <h3 className="text-lg font-semibold text-slate-800">Processing Document</h3>
         <p className="text-slate-500 mt-2 max-w-sm">
-          OCR + Llama-3.3-70B analyzing the document structure and extracting fields according to your schema...
+          OCR + Llama-3.3-70B analyzing the document structure and extracting fields according to
+          your schema...
         </p>
       </div>
     );
@@ -97,19 +121,21 @@ const ResultsViewer: React.FC<ResultsViewerProps> = ({ result, isLoading }) => {
           <div className="flex bg-slate-200/50 p-1 rounded-lg">
             <button
               onClick={() => setActiveTab('formatted')}
-              className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${activeTab === 'formatted'
+              className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${
+                activeTab === 'formatted'
                   ? 'bg-white text-slate-800 shadow-sm'
                   : 'text-slate-500 hover:text-slate-700'
-                }`}
+              }`}
             >
               Formatted
             </button>
             <button
               onClick={() => setActiveTab('json')}
-              className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${activeTab === 'json'
+              className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${
+                activeTab === 'json'
                   ? 'bg-white text-slate-800 shadow-sm'
                   : 'text-slate-500 hover:text-slate-700'
-                }`}
+              }`}
             >
               JSON View
             </button>
@@ -122,6 +148,13 @@ const ResultsViewer: React.FC<ResultsViewerProps> = ({ result, isLoading }) => {
               {result.usage.inputTokens} in / {result.usage.outputTokens} out
             </span>
           )}
+          <button
+            onClick={handleDownload}
+            className="text-slate-500 hover:text-accent p-1.5 rounded-md hover:bg-slate-100 transition-colors"
+            title="Download JSON"
+          >
+            <Download className="w-4 h-4" />
+          </button>
           <button
             onClick={handleCopy}
             className="text-slate-500 hover:text-accent p-1.5 rounded-md hover:bg-slate-100 transition-colors"
@@ -137,14 +170,20 @@ const ResultsViewer: React.FC<ResultsViewerProps> = ({ result, isLoading }) => {
           <div className="p-6">
             <h3 className="text-lg font-semibold text-slate-800 mb-4">Extracted Data</h3>
             <div className="grid gap-4">
-              {result.data && Object.entries(result.data).map(([key, value]) => (
-                <div key={key} className="group flex flex-col sm:flex-row sm:items-start border-b border-slate-100 pb-3 last:border-0 hover:bg-slate-50/50 rounded-lg px-2 -mx-2 transition-colors">
-                  <span className="text-sm font-medium text-slate-500 w-1/3 shrink-0 py-1">{key}</span>
-                  <div className="text-sm text-slate-800 font-medium break-words w-full">
-                    {renderValue(value)}
+              {result.data &&
+                Object.entries(result.data).map(([key, value]) => (
+                  <div
+                    key={key}
+                    className="group flex flex-col sm:flex-row sm:items-start border-b border-slate-100 pb-3 last:border-0 hover:bg-slate-50/50 rounded-lg px-2 -mx-2 transition-colors"
+                  >
+                    <span className="text-sm font-medium text-slate-500 w-1/3 shrink-0 py-1">
+                      {key}
+                    </span>
+                    <div className="text-sm text-slate-800 font-medium break-words w-full">
+                      {renderValue(value)}
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))}
             </div>
           </div>
         ) : (
@@ -170,9 +209,7 @@ const ResultsViewer: React.FC<ResultsViewerProps> = ({ result, isLoading }) => {
 
         {showRawText && (
           <div className="p-4 bg-slate-50 border-t border-slate-200 max-h-48 overflow-y-auto">
-            <p className="text-xs text-slate-600 font-mono whitespace-pre-wrap">
-              {result.rawText}
-            </p>
+            <p className="text-xs text-slate-600 font-mono whitespace-pre-wrap">{result.rawText}</p>
           </div>
         )}
       </div>
